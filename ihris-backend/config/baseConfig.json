@@ -9,15 +9,63 @@
   "parameter": [
     {
       "name": "fhir:base",
-      "valueString": "http://localhost:8080/hapi/fhir"
+      "valueString": "http://localhost:8080/hapi-fhir-jpaserver/fhir"
+    },
+    {
+      "name": "site:title",
+      "valueString": "Manage"
+    },
+    {
+      "name": "site:site",
+      "valueString": "Demo"
+    },
+    {
+      "name": "site:logo",
+      "valueString": "iHRIS5Logo.png"
+    },
+    {
+      "name": "site:auth:local:method",
+      "valueString": "post"
+    },
+    {
+      "name": "site:auth:local:link",
+      "valueString": "/auth/login"
+    },
+    {
+      "name": "site:auth:local:btn:image",
+      "valueString": "btn_ihris_signin.png"
+    },
+    {
+      "name": "site:auth:local:btn:text",
+      "valueString": "Sign in with iHRIS"
+    },
+    {
+      "name": "site:footer:links:about:text",
+      "valueString": "About iHRIS"
+    },
+    {
+      "name": "site:footer:links:about:to",
+      "valueString": "/static/page-about"
+    },
+    {
+      "name": "site:footer:links:feedback:text",
+      "valueString": "Feedback"
+    },
+    {
+      "name": "site:footer:links:feedback:href",
+      "valueString": "https://forms.gle/jQJ7N3nDBSxSNne58"
+    },
+    {
+      "name": "site:footer:links:ihris:text",
+      "valueString": "iHRIS Website"
+    },
+    {
+      "name": "site:footer:links:ihris:href",
+      "valueString": "http://ihris.org/"
     },
     {
       "name": "config",
       "part": [
-        {
-          "name": "ihris",
-          "valueString": "ihris-config"
-        }
       ]
     },
     {
