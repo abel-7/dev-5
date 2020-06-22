@@ -9,11 +9,11 @@
 
 <script>
 export default {
-  name: "fhir-codeable-concept",
-  props: ["field", "slotProps","sliceName","min","max","base-min","base-max","label","path","binding"],
+  name: "fhir-address",
+  props: ["field", "slotProps","sliceName","min","max","base-min","base-max","label","path"],
   data: function() {
     return {
-      source: { path: "", data: {}, edit: true, binding: this.binding }
+      source: { path: "", data: {}, edit: true }
     }
   },
   created: function() {
@@ -22,7 +22,7 @@ export default {
   watch: {
     slotProps: {
       handler() {
-        //console.log("WATCH CODEABLECONCEPT",this.path,this.slotProps)
+        //console.log("WATCH CPOINT",this.path,this.slotProps)
         this.setupData()
       },
       deep: true
@@ -30,17 +30,14 @@ export default {
   },
   methods: {
     setupData: function() {
-      //console.log("CC",this.field,this.path,this.source,this.slotProps)
       if ( this.slotProps.source ) {
-        this.source = { path: this.slotProps.source.path+"."+this.field, data: {}, 
-          edit: this.slotProps.source.edit, binding: this.binding }
-        //console.log("CC binding",this.binding)
+        this.source = { path: this.slotProps.source.path+"."+this.field, data: {}, edit: this.slotProps.source.edit }
         if ( this.slotProps.source.fromArray ) {
           this.source.data = this.slotProps.source.data
         } else {
           this.source.data = this.$fhirpath.evaluate( this.slotProps.source.data, this.field )
         }
-        //console.log("CC",this.source)
+        //console.log(this.source)
       }
     }
   },
