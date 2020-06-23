@@ -68,8 +68,6 @@ Description:    "iHRIS profile of Practitioner."
 * extension[dependents] ^label = "Dependents"
 * extension[maritalStatus].valueCoding MS
 * extension[maritalStatus] ^label = "Marital Status"
-* extension[language].valueCoding MS
-* extension[language] ^label = "Language"
 * extension[specialTraining].valueString  MS
 * extension[specialTraining] ^label = "Special Training"
 * extension[professionalLicenseCategory].valueString MS
