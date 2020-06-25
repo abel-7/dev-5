@@ -481,28 +481,36 @@ Usage:          #definition
 * item[0].item[1].item[0].required = false
 * item[0].item[1].item[0].repeats = false
 
-* item[0].item[1].item[1].linkId = "Practitioner.birthDate"
-* item[0].item[1].item[1].definition = "http://ihris.org/fhir/StructureDefinition/ihris-personal-information#birthDate"
-* item[0].item[1].item[1].text = "Birth Date"
-* item[0].item[1].item[1].type = #date
-* item[0].item[1].item[1].required = true
+* item[0].item[1].item[1].linkId = "Practitioner.extension.ethnicity"
+* item[0].item[1].item[1].definition = "http://ihris.org/fhir/StructureDefinition/ihris-personal-information#extension:ethnicity"
+* item[0].item[1].item[1].text = "Ethnicity"
+* item[0].item[1].item[1].type = #choice
+* item[0].item[1].item[1].answerValueSet = "http://ihris.org/fhir/ValueSet/ihris-Ethnicity-valueset"
+* item[0].item[1].item[1].required = false
 * item[0].item[1].item[1].repeats = false
 
-* item[0].item[1].item[2].linkId = "Practitioner.gender"
-* item[0].item[1].item[2].definition = "http://ihris.org/fhir/StructureDefinition/ihris-personal-information#gender"
-* item[0].item[1].item[2].text = "Gender"
-* item[0].item[1].item[2].type = #choice
-* item[0].item[1].item[2].answerValueSet = "http://hl7.org/fhir/ValueSet/administrative-gender"
+* item[0].item[1].item[2].linkId = "Practitioner.birthDate"
+* item[0].item[1].item[2].definition = "http://ihris.org/fhir/StructureDefinition/ihris-personal-information#birthDate"
+* item[0].item[1].item[2].text = "Birth Date"
+* item[0].item[1].item[2].type = #date
 * item[0].item[1].item[2].required = true
 * item[0].item[1].item[2].repeats = false
 
-* item[0].item[1].item[3].linkId = "Practitioner.extension.maritalStatus"
-* item[0].item[1].item[3].definition = "http://ihris.org/fhir/StructureDefinition/ihris-personal-information#extension:maritalStatus"
-* item[0].item[1].item[3].text = "Marital Status"
+* item[0].item[1].item[3].linkId = "Practitioner.gender"
+* item[0].item[1].item[3].definition = "http://ihris.org/fhir/StructureDefinition/ihris-personal-information#gender"
+* item[0].item[1].item[3].text = "Gender"
 * item[0].item[1].item[3].type = #choice
-* item[0].item[1].item[3].answerValueSet = "http://hl7.org/fhir/ValueSet/marital-status"
-* item[0].item[1].item[3].required = false
+* item[0].item[1].item[3].answerValueSet = "http://hl7.org/fhir/ValueSet/administrative-gender"
+* item[0].item[1].item[3].required = true
 * item[0].item[1].item[3].repeats = false
+
+* item[0].item[1].item[4].linkId = "Practitioner.extension.maritalStatus"
+* item[0].item[1].item[4].definition = "http://ihris.org/fhir/StructureDefinition/ihris-personal-information#extension:maritalStatus"
+* item[0].item[1].item[4].text = "Marital Status"
+* item[0].item[1].item[4].type = #choice
+* item[0].item[1].item[4].answerValueSet = "http://hl7.org/fhir/ValueSet/marital-status"
+* item[0].item[1].item[4].required = false
+* item[0].item[1].item[4].repeats = false
 
 * item[0].item[2].linkId = "Practitioner.extension[0]"
 * item[0].item[2].definition = "http://ihris.org/fhir/StructureDefinition/ihris-practitioner#extension:residence"
