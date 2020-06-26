@@ -36,6 +36,7 @@ Description:    "iHRIS profile of Practitioner."
     IhrisPractitionerRoleEmploymentStatus named employmentStatus 0..1 MS and
     IhrisPractitionerRoleJobType named jobType 0..1 MS and
     IhrisPractitionerRoleFirstEmploymentDate named firstEmploymentDate 1..1 MS and
+    IhrisPractitionerRoleSkill named skill 0..* MS and
     IhrisPractitionerRoleJobInformationRemark named jobInformationRemark 0..1 MS
 * extension[shift].valueCoding MS
 * extension[shift] ^label = "Shift"
@@ -43,6 +44,8 @@ Description:    "iHRIS profile of Practitioner."
 * extension[employmentStatus] ^label = "Employment Status"
 * extension[jobType].valueCoding MS
 * extension[jobType] ^label = "Job Type"
+* extension[skill].valueCoding MS
+* extension[skill] ^label = "Skill"
 * extension[firstEmploymentDate].valueDate MS
 * extension[firstEmploymentDate] ^label = "First Employment Date"
 * extension[jobInformationRemark].valueString MS
@@ -116,6 +119,40 @@ ValueSet:         IhrisJobTypeValueSet
 Id:               ihris-job-type-valueset
 Title:            "iHRIS Job Type ValueSet"
 * codes from system IhrisJobTypeCodeSystem
+
+Extension:      IhrisPractitionerRoleSkill
+Id:             ihris-practitionerrole-skill
+Title:          "iHRIS Job Description Skill"
+Description:    "iHRIS extension for Job Description Skill."
+* ^context.type = #element
+* ^context.expression = "PractitionerRole"
+* value[x] only Coding
+* valueCoding 1..1 MS
+* valueCoding ^label = "Skill"
+* valueCoding from IhrisSkillValueSet (required)
+
+CodeSystem:      IhrisSkillCodeSystem
+Id:              ihris-skill-codesystem
+Title:           "iHRIS Skill CodeSystem"
+* #activeListening "Active Listening" "Active Listening"
+* #adaptability "Adaptability" "Adaptability"
+* #communication  "Communication" "Communication"
+* #creativity "Creativity" "Creativity"
+* #criticalThinking "Critical Thinking" "Critical Thinking"
+* #customerService  "Customer Service" "Customer Service"
+* #decisionMaking "Decision Making" "Decision Making"
+* #interpersonalCommunication "Interpersonal Communication" "Interpersonal Communication"
+* #management  "Management" "Management"
+* #leadership "Leadership" "Leadership"
+* #organization "Organization" "Organization"
+* #publicSpeaking  "Public Speaking" "Public Speaking"
+* #problemSolving "Problem Solving" "Problem Solving"
+* #teamWork "Team Work" "Team Work"
+
+ValueSet:         IhrisSkillValueSet
+Id:               ihris-skill-valueset
+Title:            "iHRIS Skill ValueSet"
+* codes from system IhrisSkillCodeSystem
 
 Extension:      IhrisPractitionerRoleFirstEmploymentDate
 Id:             ihris-practitionerrole-first-employment-date

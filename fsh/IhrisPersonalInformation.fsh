@@ -877,9 +877,17 @@ Usage:          #definition
 * item[1].item[6].required = true
 * item[1].item[6].repeats = false
 
-* item[1].item[7].linkId = "PractitionerRole.extension.jobInformationRemark"
-* item[1].item[7].definition = "http://ihris.org/fhir/StructureDefinition/ihris-job-description#extension:jobInformationRemark"
-* item[1].item[7].text = "Remark"
-* item[1].item[7].type = #text
-* item[1].item[7].required = true
-* item[1].item[7].repeats = false
+* item[1].item[7].linkId = "PractitionerRole.extension.skill"
+* item[1].item[7].definition = "http://ihris.org/fhir/StructureDefinition/ihris-job-description#extension:skill"
+* item[1].item[7].text = "Skill"
+* item[1].item[7].type = #choice
+* item[1].item[7].answerValueSet = "http://ihris.org/fhir/ValueSet/ihris-skill-valueset"
+* item[1].item[7].required = false
+* item[1].item[7].repeats = true
+
+* item[1].item[8].linkId = "PractitionerRole.extension.jobInformationRemark"
+* item[1].item[8].definition = "http://ihris.org/fhir/StructureDefinition/ihris-job-description#extension:jobInformationRemark"
+* item[1].item[8].text = "Remark"
+* item[1].item[8].type = #text
+* item[1].item[8].required = true
+* item[1].item[8].repeats = false
