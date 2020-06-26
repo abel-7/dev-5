@@ -833,6 +833,13 @@ Usage:          #definition
 * item[1].item[1].required = true
 * item[1].item[1].repeats = false
 
+* item[1].item[1].linkId = "PractitionerRole.location"
+* item[1].item[1].definition = "http://ihris.org/fhir/StructureDefinition/ihris-job-description#location"
+* item[1].item[1].text = "Duty Station"
+* item[1].item[1].type = #string
+* item[1].item[1].required = true
+* item[1].item[1].repeats = false
+
 * item[1].item[2].linkId = "PractitionerRole.extension.employmentStatus"
 * item[1].item[2].definition = "http://ihris.org/fhir/StructureDefinition/ihris-job-description#extension:employmentStatus"
 * item[1].item[2].text = "Employment Status"
