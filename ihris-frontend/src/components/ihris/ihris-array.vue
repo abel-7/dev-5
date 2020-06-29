@@ -1,7 +1,7 @@
 <template>
   <div>
     <div v-if="simpleDisplay">
-      <v-row v-if="simpleDisplay" dense>
+      <v-row dense>
         <v-col cols="3" class="font-weight-bold">{{label}}</v-col><v-col cols="9">{{simpleValue}}</v-col>
       </v-row>
       <v-divider></v-divider>
@@ -11,13 +11,13 @@
         <v-system-bar
           color="secondary"
           dark
-          v-if="source.edit"
-        >
+          v-if="edit"
+          >
           {{ label }}
           <v-spacer></v-spacer>
           <v-btn v-if="subAvailable" icon @click="removeRow()"><v-icon>mdi-minus</v-icon></v-btn>
           <v-btn v-if="addAvailable" icon @click="addRow()"><v-icon>mdi-plus</v-icon></v-btn>
-          </v-system-bar>
+        </v-system-bar>
         <slot v-for="input in inputs" :input="input" :source="input.source"></slot>
       </v-card>
     </div>
@@ -27,11 +27,11 @@
 <script>
 export default {
   name: "ihris-array",
-  props: ["label", "min", "max", "id", "path", "slotProps", "field", "fieldType", "profile", "targetProfile", "sliceName" ],
+  props: ["label", "min", "max", "id", "path", "slotProps", "field", "fieldType", "profile", "targetProfile", "sliceName", "edit" ],
   data: function() {
     return {
       inputs: [],
-      source: { path: "", data: [], edit: true },
+      source: { path: "", data: [] },
       isArray: true
     }
   },
@@ -51,11 +51,13 @@ export default {
   methods: {
     setupInputs: function() {
       this.inputs = []
-      this.source = { path: this.path, data: {}, edit: true }
+      this.source = { path: this.path, data: {} }
       let path = this.path
       if ( this.slotProps && this.slotProps.source ) {
-        this.source.edit = this.slotProps.source.edit
-        let expression = this.field.replace(/([^:]+):(.+)/, "$1.where(url='"+this.profile+"')")
+        let expression = this.field
+        if ( this.sliceName ) {
+          expression = this.field.replace(/([^:]+):(.+)/, "$1.where(url='"+this.profile+"')")
+        }
         this.source.data = this.$fhirpath.evaluate( this.slotProps.source.data, expression)
       }
       for( let idx = 0; idx < this.actualMin; idx++ ) {
@@ -65,13 +67,11 @@ export default {
         }
         let input = { label: label, index: idx, data: undefined } 
         if ( this.source.data[idx] ) {
-          input.source = { data: this.source.data[idx], path: path+"["+idx+"]", fromArray: true, edit: true }
-          if ( this.slotProps && this.slotProps.source ) {
-            input.source.edit = this.slotProps.source.edit
-          }
+          input.source = { data: this.source.data[idx], path: path+"["+idx+"]", fromArray: true }
         }
         this.inputs.push( input )
       }
+      //console.log("ARR inputs",this.id,this.source,this.inputs)
     },
     addRow: function() {
       if ( this.addAvailable ) {
@@ -106,7 +106,7 @@ export default {
       return this.actualMin < this.inputs.length
     },
     simpleDisplay: function() {
-      return !this.source.edit && [ "string" ].includes(this.fieldType)
+      return !this.edit && [ "string" ].includes(this.fieldType)
     },
     simpleValue: function() {
       return this.source.data.join(" ")

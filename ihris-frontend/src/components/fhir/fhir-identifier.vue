@@ -10,10 +10,10 @@
 <script>
 export default {
   name: "fhir-identifier",
-  props: ["field", "slotProps","sliceName","min","max","base-min","base-max","label","path"],
+  props: ["field", "slotProps","sliceName","min","max","base-min","base-max","label","path","edit"],
   data: function() {
     return {
-      source: { path: "", data: {}, edit: true }
+      source: { path: "", data: {} }
     }
   },
   created: function() {
@@ -31,13 +31,13 @@ export default {
   methods: {
     setupData: function() {
       if ( this.slotProps && this.slotProps.source ) {
-        this.source = { path: this.slotProps.source.path+"."+this.field, data: {}, edit: this.slotProps.source.edit }
+        this.source = { path: this.slotProps.source.path+"."+this.field, data: {} }
         if ( this.slotProps.source.fromArray ) {
           this.source.data = this.slotProps.source.data
         } else {
           this.source.data = this.$fhirpath.evaluate( this.slotProps.source.data, this.field )
         }
-        console.log("ID",this.source,this.slotProps)
+        //console.log("ID",this.source,this.slotProps)
       }
     }
   },

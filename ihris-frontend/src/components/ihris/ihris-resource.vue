@@ -20,12 +20,16 @@
       >
       <v-list class="white--text">
         <v-list-item>
-          <v-btn dark class="accent darken-1" @click="$router.go(-1)" v-if="isEdit">
-          <v-icon light>mdi-content-save</v-icon>
-          <span>Back</span>
+          <v-btn v-if="!edit" dark class="secondary" @click="$emit('setEdit', !edit)">
+          <v-icon light>mdi-pencil</v-icon>
+          <span>Edit</span>
+          </v-btn>
+          <v-btn v-else dark class="secondary" @click="$router.go(0)">
+          <v-icon light>mdi-pencil-off</v-icon>
+          <span>Cancel</span>
           </v-btn>
           <v-spacer></v-spacer>
-          <v-btn dark class="success darken-1" @click="processFHIR()">
+          <v-btn dark class="success darken-1" @click="processFHIR()" v-if="edit">
           <v-icon light>mdi-content-save</v-icon>
           <span>Save</span>
           </v-btn>
@@ -33,7 +37,7 @@
         <v-divider color="white"></v-divider>
         <v-subheader class="white--text"><h2>Sections</h2></v-subheader>
         <v-list-item v-for="section in sectionMenu" :href="'#section-'+section.name" :key="section.name">
-          <v-list-item-content class="white--text">
+          <v-list-item-content class="white--text" v-if="!edit || !section.secondary">
             <v-list-item-title class="text-uppercase"><h4>{{ section.title }}</h4></v-list-item-title>
             <v-list-item-subtitle class="white--text">{{ section.desc }}</v-list-item-subtitle>
           </v-list-item-content>
@@ -48,11 +52,11 @@
 <script>
 export default {
   name: "ihris-resource",
-  props: ["title","field","fhir-id","page","profile","section-menu" ],
+  props: ["title","field","fhir-id","page","profile","section-menu","edit" ],
   data: function() {
     return {
       fhir: {},
-      source: { data: {}, path: "", edit: true },
+      source: { data: {}, path: "" },
       loading: false,
       overlay: false,
       isEdit: false
@@ -65,7 +69,7 @@ export default {
       fetch( "/fhir/"+this.field+"/"+this.fhirId ).then(response => {
         response.json().then(data => {
           //this.$store.commit('setCurrentResource', data)
-          this.source = { data: data, path: this.field, edit: false }
+          this.source = { data: data, path: this.field }
           this.loading = false
           //console.log(data)
         }).catch(err=> {
@@ -108,22 +112,33 @@ export default {
       }
       //console.log(this)
       processChildren( this.field, this.fhir, this.$children )
-      console.log("SAVE",this.fhir)
-      fetch( "/fhir/"+this.field, {
+      let url = "/fhir/"+this.field
+      let opts = {
         method: "POST",
         headers: {
           "Content-Type": "application/fhir+json"
         },
         redirect: 'manual',
-        body: JSON.stringify(this.fhir)
-      } ).then(response => {
+      } 
+      if ( this.fhirId ) {
+        this.fhir.id = this.fhirId
+        url += "/" + this.fhirId
+        opts.method = "PUT"
+      }
+      opts.body = JSON.stringify(this.fhir)
+      console.log("SAVE",url,this.fhir)
+      fetch( url, opts ).then(response => {
         //console.log(response)
         //console.log(response.headers)
-        if ( response.status === 201 ) {
+        if ( response.status === 201 || response.status === 200 ) {
           response.json().then(data => {
             this.overlay = false
             this.loading = false
-            this.$router.push({ name:"resource_view", params: {page: this.page, id: data.id} })
+            if ( this.fhirId ) {
+              this.$router.go(0)
+            } else {
+              this.$router.push({ name:"resource_view", params: {page: this.page, id: data.id } })
+            }
           })
         }
       } )

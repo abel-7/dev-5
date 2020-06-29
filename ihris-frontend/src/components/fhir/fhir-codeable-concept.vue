@@ -1,6 +1,6 @@
 <template>
   <v-card>
-    <v-card-subtitle class="primary--text text-uppercase font-weight-bold">{{ display }}</v-card-subtitle>
+    <v-card-subtitle class="text-uppercase font-weight-bold">{{ display }}</v-card-subtitle>
     <v-card-text>
       <slot :source="source"></slot>
     </v-card-text>
@@ -10,10 +10,10 @@
 <script>
 export default {
   name: "fhir-codeable-concept",
-  props: ["field", "slotProps","sliceName","min","max","base-min","base-max","label","path","binding"],
+  props: ["field", "slotProps","sliceName","min","max","base-min","base-max","label","path","binding","edit"],
   data: function() {
     return {
-      source: { path: "", data: {}, edit: true, binding: this.binding }
+      source: { path: "", data: {}, binding: this.binding }
     }
   },
   created: function() {
@@ -33,14 +33,14 @@ export default {
       //console.log("CC",this.field,this.path,this.source,this.slotProps)
       if ( this.slotProps && this.slotProps.source ) {
         this.source = { path: this.slotProps.source.path+"."+this.field, data: {}, 
-          edit: this.slotProps.source.edit, binding: this.binding }
+          binding: this.binding }
         //console.log("CC binding",this.binding)
         if ( this.slotProps.source.fromArray ) {
           this.source.data = this.slotProps.source.data
         } else {
           this.source.data = this.$fhirpath.evaluate( this.slotProps.source.data, this.field )
         }
-        //console.log("CC",this.source)
+        //console.log("CC2",this.field,this.source)
       }
     }
   },

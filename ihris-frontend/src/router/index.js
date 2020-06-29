@@ -21,6 +21,14 @@ const routes = [
     name: "static",
     component: () => import(/* webpackChunkName: "about" */ "../views/static-page.vue")
   },
+  //{
+    //path: "/resource/:type/:page/:id?",
+    //name: "resource_page",
+    //// route level code-splitting
+    //// this generates a separate chunk (about.[hash].js) for this route
+    //// which is lazy-loaded when the route is visited.
+    //component: () => import(/* webpackChunkName: "about" */ "../views/fhir-page-resource.vue")
+  //},
   {
     path: "/resource/view/:page/:id",
     name: "resource_view",
@@ -46,12 +54,12 @@ const routes = [
     component: () => import(/* webpackChunkName: "about" */ "../views/fhir-page-add.vue")
   },
   {
-    path: "/questionnaire/:questionnaire",
+    path: "/questionnaire/:questionnaire/:page",
     name: "questionnaire",
     // route level code-splitting
     // this generates a separate chunk (about.[hash].js) for this route
     // which is lazy-loaded when the route is visited.
-    component: () => import(/* webpackChunkName: "about" */ "../views/fhir-questionnaire.vue")
+    component: () => import(/* webpackChunkName: "about" */ "../views/fhir-page-questionnaire.vue")
   }
 ]
 

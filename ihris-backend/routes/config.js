@@ -4,6 +4,7 @@ const nconf = require('../modules/config')
 const fhirAxios = nconf.fhirAxios
 const outcomes = require('../config/operationOutcomes')
 const fhirConfig = require('../modules/fhirConfig')
+const structureDef = require('../modules/fhirStructureDefinition')
 const crypto = require('crypto')
 
 /* GET home page. */
@@ -67,16 +68,18 @@ const processFields = ( fields, base, order ) => {
     let isArray = false
     if ( fields[field]["max"] !== "1" ) {
       isArray = true
-      output += "<ihris-array fieldType=\""+eleName+"\" :slotProps=\"slotProps\""
+      output += "<ihris-array :edit=\"isEdit\" fieldType=\""+eleName+"\" :slotProps=\"slotProps\""
       let arr_attrs = [ "field", "label", "min", "max", "id", "path", "profile", "targetProfile", "sliceName" ]
       for ( let attr of arr_attrs ) {
-        output += " "+attr+"=\""+fields[field][attr]+"\""
+        if ( fields[field].hasOwnProperty(attr) ) {
+          output += " "+attr+"=\""+fields[field][attr]+"\""
+        }
       }
       output += ">\n<template #default=\"slotProps\">\n"
     } else {
       attrs.unshift("id")
     }
-    output += "<fhir-"+eleName +" :slotProps=\"slotProps\""
+    output += "<fhir-"+eleName +" :slotProps=\"slotProps\" :edit=\"isEdit\""
     for( let attr of attrs ) {
       if ( fields[field].hasOwnProperty(attr) ) {
         output += " "+attr+"=\""+fields[field][attr]+"\""
@@ -89,7 +92,7 @@ const processFields = ( fields, base, order ) => {
       let subAttrs = [ "id", "path", "label", "min", "max", "base-min", "base-max", "code" ]
       for( let refField of Object.keys(refFields) ) {
         subFields[refField] = {}
-        console.log("refLOOP",refField,refFields)
+        //console.log("refLOOP",refField,refFields)
         for( let attr of subAttrs ) {
           if ( refFields[refField].hasOwnProperty(attr) ) {
             if ( (attr === "id" || attr === "path") && fields[field].hasOwnProperty(attr) ) {
@@ -147,7 +150,7 @@ router.get('/page/:page', function(req, res) {
     return res.status(401).json( outcomes.DENIED )
   }
 
-  fhirAxios.read( "Basic", page ).then ( (resource) => {
+  fhirAxios.read( "Basic", page ).then ( async (resource) => {
     let pageDisplay = resource.extension.find( ext => ext.url === "http://ihris.org/fhir/StructureDefinition/ihris-page-display" )
     let pageResource = pageDisplay.extension.find( ext => ext.url === "resource" ).valueReference.reference
     /*
@@ -166,13 +169,14 @@ router.get('/page/:page', function(req, res) {
     } catch(err) { }
     let pageSections = resource.extension.filter( ext => ext.url === "http://ihris.org/fhir/StructureDefinition/ihris-page-section" )
 
-    console.log(filters)
-    console.log(search)
+    //console.log(filters)
+    //console.log(search)
     let sections = {}
     let sectionMap = {}
     for( let section of pageSections ) {
-      let title, description, name, resource, linkfield
+      let title, description, name, resourceExt, resource, linkfield, searchfield
       let fields = []
+      let columns = []
       try {
         title = section.extension.find( ext => ext.url === "title" ).valueString
       } catch(err) { }
@@ -186,11 +190,39 @@ router.get('/page/:page', function(req, res) {
         fields = section.extension.filter( ext => ext.url === "field" ).map( ext => ext.valueString )
       } catch(err) { }
       try {
-        resource = section.extension.find( ext => ext.url === "resource" ).valueReference.reference
-      } catch(err) { }
-      try {
-        linkfield = section.extension.find( ext => ext.url === "linkfield" ).valueString
-      } catch(err) { }
+        resourceExt = section.extension.find( ext => ext.url === "resource" ).extension
+
+        resource = resourceExt.find( ext => ext.url === "resource" ).valueReference.reference
+        if ( resource ) {
+          linkfield = resourceExt.find( ext => ext.url === "linkfield" ).valueString
+          try {
+            searchfield = resourceExt.find( ext => ext.url === "searchfield" ).valueString
+          } catch(err) { }
+          let columnsExt = resourceExt.filter( ext => ext.url === "column" )
+          for ( let column of columnsExt ) {
+            try {
+              let header = column.extension.find( ext => ext.url === "header" ).valueString
+              let field = column.extension.find( ext => ext.url === "field" ).valueString
+              if ( header && field ) {
+                /*
+                let definition = await structureDef.getFieldDefinition( resource +"#"+ field )
+                let binding = ""
+                if ( definition.binding ) {
+                  binding = details.binding
+                } else if ( details.type[0].code === "Coding" ) {
+                  definition = await structureDef.getFieldDefinition( resource +"#"+ field.substring( 0, field.lastIndexOf('.') ) )
+                  if ( definition.binding ) {
+                    binding = details.binding
+                  }
+                }
+                */
+                columns.push( {text: header, value: field} )
+              }
+            } catch(err) { console.log("ERR",err) }
+          }
+        }
+
+      } catch(err) { console.log("ERR2",err) }
 
       let sectionOrder = {}
       setupOrder( fields, sectionOrder )
@@ -204,6 +236,8 @@ router.get('/page/:page', function(req, res) {
         order: sectionOrder,
         resource: resource,
         linkfield: linkfield,
+        searchfield: searchfield,
+        columns: columns,
         elements: {}
       } 
     }
@@ -254,14 +288,16 @@ router.get('/page/:page', function(req, res) {
             order: {},
             resource: undefined,
             linkfield: undefined,
+            searchfield: undefined,
+            columns: [],
             elements: {}
           }
         }
         let sectionKeys = Object.keys(sections)
         let sectionMenu
-        vueOutput = '<ihris-resource profile="'+resource.url+'" page="'+req.params.page+'" field="'+fhir+'" title="'+sections[fhir].title+'"'
+        vueOutput = '<ihris-resource :fhir-id="fhirId" :edit="isEdit" v-on:setEdit="setEdit($event)" profile="'+resource.url+'" page="'+req.params.page+'" field="'+fhir+'" title="'+sections[fhir].title+'"'
         if ( sectionKeys.length > 1 ) {
-          sectionMenu = sectionKeys.map( name => { return { name: name, title: sections[name].title, desc: sections[name].description } } )
+          sectionMenu = sectionKeys.map( name => { return { name: name, title: sections[name].title, desc: sections[name].description, secondary: !!sections[name].resource } } )
           vueOutput += " :section-menu='"+JSON.stringify(sectionMenu).replace(/'/g, "\'")+"'"
         }
         vueOutput += '><template #default=\"slotProps\">'+"\n"
@@ -277,7 +313,7 @@ router.get('/page/:page', function(req, res) {
           }
         }
         for ( let name of sectionKeys ) {
-          vueOutput += "<ihris-section :slotProps=\"slotProps\" name=\""+name+"\" title=\""+sections[name].title+"\" description=\""+sections[name].description+"\">\n<template #default=\"slotProps\">\n"
+          vueOutput += "<ihris-section :slotProps=\"slotProps\" :edit=\"isEdit\" name=\""+name+"\" title=\""+sections[name].title+"\" description=\""+sections[name].description+"\" :secondary=\""+!!sections[name].resource+"\">\n<template #default=\"slotProps\">\n"
           if ( sections[name].resource ) {
             let secondary = await getDefinition( sections[name].resource )
 
@@ -290,10 +326,14 @@ router.get('/page/:page', function(req, res) {
             setupOrder( sections[name].fields, secondaryOrder )
             let secondaryKeys = Object.keys( secondaryStructure )
             for ( let second_fhir of secondaryKeys ) {
-              vueOutput += '<ihris-secondary profile="'+secondary.url+'" field="'+second_fhir+'" title="'
-                +sections[name].title+'" link-field="'+sections[name].linkfield
-                +'"><template #default="slotProps">' + "\n"
-              vueOutput += processFields( secondaryStructure[second_fhir].fields, second_fhir, secondaryOrder )
+              vueOutput += '<ihris-secondary :edit="isEdit" :link-id="fhirId" profile="'+secondary.url
+                +'" field="'+second_fhir
+                +'" title="'+sections[name].title
+                +'" link-field="'+sections[name].linkfield
+                +'" search-field="'+(sections[name].searchfield || "")
+                +'" :columns=\''+JSON.stringify(sections[name].columns).replace(/'/g, "\'")
+                +'\'><template #default="slotProps">' + "\n"
+              //vueOutput += processFields( secondaryStructure[second_fhir].fields, second_fhir, secondaryOrder )
               vueOutput += "</template></ihris-secondary>"
             }
 
@@ -326,12 +366,12 @@ const processQuestionnaireItems = ( items ) => {
   let vueOutput = ""
   for( let item of items ) {
     if ( item.repeats && !item.readOnly ) {
-      vueOutput += "<ihris-array path=\"" + item.linkId + "\" label=\""
+      vueOutput += "<ihris-array :edit=\"isEdit\" path=\"" + item.linkId + "\" label=\""
         + item.text + "\" max=\"*\" min=\"" + ( item.required ? "1" : "0" ) + "\"><template #default=\"slotProps\">\n"
     }
     if ( item.type === "group" ) {
       let label = item.text.split('|',2)
-      vueOutput += '<ihris-questionnaire-group path="' + item.linkId + '" label="' + label[0] + '"'
+      vueOutput += '<ihris-questionnaire-group :edit=\"isEdit\" path="' + item.linkId + '" label="' + label[0] + '"'
       if ( label.length === 2 ) {
         vueOutput += ' description="' + label[1] + '"'
       }
@@ -353,7 +393,7 @@ const processQuestionnaireItems = ( items ) => {
       }
       vueOutput += "></ihris-hidden>\n"
     } else {
-     vueOutput += "<fhir-" + item.type + " path=\"" + item.linkId + "\""
+     vueOutput += "<fhir-" + item.type + " :edit=\"isEdit\" path=\"" + item.linkId + "\""
 
       if ( item.hasOwnProperty("text") ) {
         vueOutput += " label=\""+ item.text + "\""
@@ -391,7 +431,8 @@ router.get('/questionnaire/:questionnaire', function(req, res) {
   fhirAxios.read( "Questionnaire", req.params.questionnaire ).then ( (resource) => {
 
 
-    let vueOutput = '<ihris-questionnaire id="' + resource.id + '" title="' + resource.title 
+    let vueOutput = '<ihris-questionnaire :edit=\"isEdit\" :view-page="viewPage" url="' + resource.url + '" id="' + resource.id 
+      + '" title="' + resource.title 
       + '" description="' + resource.description + '" purpose="' + resource.purpose 
       + '"__SECTIONMENU__>' + "\n"
 

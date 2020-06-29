@@ -1,6 +1,6 @@
 <template>
   <v-card>
-    <v-card-subtitle class="primary--text text-uppercase font-weight-bold">{{ label }}</v-card-subtitle>
+    <v-card-subtitle class="text-uppercase font-weight-bold">{{ label }}</v-card-subtitle>
     <v-card-text>
       <v-text-field :label="display" v-model="value.reference" outlined hide-details="auto" dense>
       </v-text-field>
@@ -12,10 +12,10 @@
 export default {
   name: "fhir-reference",
   props: ["field","label","sliceName","targetprofile","min","max","base-min","base-max",
-    "slotProps","path","sub-fields"],
+    "slotProps","path","sub-fields","edit"],
   data: function() {
     return {
-      source: { path: "", data: {}, edit: true },
+      source: { path: "", data: {} },
       value: { reference: "" },
       qField: "valueReference"
     }
@@ -35,7 +35,7 @@ export default {
   methods: {
     setupData: function() {
       if ( this.slotProps && this.slotProps.source ) {
-        this.source = { path: this.slotProps.source.path+"."+this.field, data: {}, edit: this.slotProps.source.edit }
+        this.source = { path: this.slotProps.source.path+"."+this.field, data: {} }
         if ( this.slotProps.source.fromArray ) {
           this.source.data = this.slotProps.source.data
         } else {

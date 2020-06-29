@@ -95,7 +95,15 @@ const fhirAxios = {
         reject( err )
       }
       let url = new URL(fhirAxios.baseUrl.href)
-      url.pathname += resource.resourceType 
+      if ( resource.resourceType !== "Bundle" ) {
+        url.pathname += resource.resourceType 
+      } else {
+        if ( !( resource.type === "transaction" || resource.type === "batch" ) ) {
+          err = new InvalidRequestError( "Bundles must of type 'transaction' or 'batch'" )
+          err.response = { status: 404 }
+          reject( err )
+        }
+      }
 
       let auth = fhirAxios.__getAuth()
       axios.post( url.href, resource, { auth: auth } ).then ( (response) => {
@@ -202,6 +210,21 @@ const fhirAxios = {
             resolve( response.data )
           }
         }
+      } ).catch( (err) => {
+        reject ( err )
+      } )
+    } )
+  },
+  lookup: ( params ) => {
+    return new Promise( (resolve, reject) => {
+      let url = new URL( fhirAxios.baseUrl.href )
+      url.pathname += "CodeSystem/$lookup"
+      url.searchParams.append("system", params.system)
+      url.searchParams.append("code", params.code)
+
+      let auth = fhirAxios.__getAuth()
+      axios.get( url.href, { auth: auth } ).then( (response) => {
+        resolve( response.data )
       } ).catch( (err) => {
         reject ( err )
       } )

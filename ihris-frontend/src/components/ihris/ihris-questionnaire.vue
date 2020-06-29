@@ -10,11 +10,6 @@
         ></v-progress-circular>
       <v-btn @click="overlay = false">Close</v-btn>
     </v-overlay>
-    <v-container class="ma-5">
-      <pre>
-{{fhir}}
-      </pre>
-    </v-container>
 
     <v-navigation-drawer
       app
@@ -55,7 +50,7 @@
 <script>
 export default {
   name: "ihris-questionnaire",
-  props: ["id", "title", "description", "purpose", "section-menu"],
+  props: ["id", "url", "title", "description", "purpose", "section-menu", "view-page", "edit"],
   data: function() {
     return {
       fhir: {},
@@ -64,10 +59,6 @@ export default {
       isEdit: false
     }
   },
-  created: function() {
-  },
-  computed: {
-  },
   methods: {
     processFHIR: function() {
       this.overlay = true
@@ -75,15 +66,14 @@ export default {
       //console.log(this.field)
       this.fhir = { 
         resourceType: "QuestionnaireResponse",
-        questionnaire: "http://ihris.org/fhir/Questionnaire/" + this.id,
+        questionnaire: this.url,
         status: "completed",
         item: []
       }
       //console.log(this)
       processChildren( this.fhir.item, this.$children )
       console.log("SAVE",this.fhir)
-      /*
-      fetch( "/fhir/"+this.field, {
+      fetch( "/fhir/QuestionnaireResponse", {
         method: "POST",
         headers: {
           "Content-Type": "application/fhir+json"
@@ -97,11 +87,21 @@ export default {
           response.json().then(data => {
             this.overlay = false
             this.loading = false
-            this.$router.push({ name:"resource_view", params: {page: this.page, id: data.id} })
+            if ( this.viewPage && data.subject && data.subject.reference ) {
+              let subject = data.subject.reference.split('/')
+              if ( subject[1] ) {
+                subject = subject[1]
+              } else {
+                subject = data.subject.reference
+              }
+              this.$router.push({ name:"resource_view", params: {page: this.viewPage, id: subject } })
+            } else {
+              this.$router.push({ name:"home" })
+            }
+            //console.log(data)
           })
         }
       } )
-      */
       //console.log(this.fhir)
 
       /*
